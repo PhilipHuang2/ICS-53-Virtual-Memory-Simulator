@@ -31,6 +31,7 @@ A simple c program the replicates the Virtual memory System
 # Expected Functions
 1. void read(int virtualAddress)
   * print out contents of Memory Address
+   * **CAN CAUSE PAGE FAULT**
 2.  void write( int virtualAddress, int num)
   * look into virtual address and insert Num
    * **CAN CAUSE PAGE FAULT**
