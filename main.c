@@ -9,10 +9,14 @@ struct pageEntry
 };
 
 
-void showPageTable(struct pageEntry pageTable[]);
 void showMem(int array[], int length);
 void showMainMemory(int array[]);
 void showDisk(int array[]);
+void read(int virtualAddress);
+void write (int virtualAddress, int num);
+void showMain (int physicalPageNumber);
+void showDisk(int diskPageNumber);
+void showPageTable(struct pageEntry pageTable[]);
 
 int main()
 {
@@ -40,15 +44,9 @@ int main()
 	
 	
 	}while(strcmp(input,"quit\n") != 0);
-
-void showPageTable(struct pageEntry pageTable[]){
-	int count = 0;
-	while(count < 8)
-	{
-		printf("%d:%d:%d:%d\n",count,pageTable[count].valid,pageTable[count].dirty,pageTable[count].pageNum);
-		count++;
-	}
 }
+
+
 
 void showMem(int array[], int length){
 	int count = 0;
@@ -99,6 +97,12 @@ void showDisk(int diskPageNumber){
 
 }
 
-void showPageTable(){
+void showPageTable(struct pageEntry pageTable[]){
 	//print out the 8 pageEntry Objects
+	int count = 0;
+	while(count < 8)
+	{
+		printf("%d:%d:%d:%d\n",count,pageTable[count].valid,pageTable[count].dirty,pageTable[count].pageNum);
+		count++;
+	}
 }
