@@ -9,18 +9,17 @@ struct pageEntry
 };
 
 
-void showMem(int array[], int length);
-void showMainMemory(int array[]);
-void showDisk(int array[]);
 void read(int virtualAddress);
 void write (int virtualAddress, int num);
 void showMain (int physicalPageNumber);
 void showDisk(int diskPageNumber);
-void showPageTable(struct pageEntry pageTable[]);
+void showPageTable();
 
+struct pageEntry pageTable[8];
+int mainMemory[16]= {0};
+int disk[32] = {0};	
 int main()
 {
-	struct pageEntry pageTable[8];
 	int count = 0;
 	while(count < 8)
 	{
@@ -30,9 +29,8 @@ int main()
 		count++;
 	}
 	showPageTable(pageTable);
-	int mainMemory[16]= {0};
-	int disk[32] = {0};	
-	showMainMemory(mainMemory);
+	showMain(1);
+	showDisk(4);
 	char input[90];
 	printf("Hello World\n");
 	do
@@ -45,26 +43,6 @@ int main()
 	
 	}while(strcmp(input,"quit\n") != 0);
 }
-
-
-
-void showMem(int array[], int length){
-	int count = 0;
-	while(count < length)
-	{
-		printf("%d:%d\n",count,array[count]);
-		count++;
-	}
-}
-
-void showMainMemory(int array[]){
-	showMem(array, 16);
-}
-void showDisk(int array[])
-{
-	showMem(array,32);
-}
-
 
 void read(int virtualAddress){
 
@@ -86,18 +64,28 @@ void write (int virtualAddress, int num){
 }
 
 void showMain (int physicalPageNumber){
-
 	//prints out the 4 address and data associated with the main memory page
-
+	int count = physicalPageNumber * 4;
+	int final = count + 4;
+	while(count < final)
+	{
+		printf("%d:%d\n",count,mainMemory[count]);
+		count++;
+	}	
 }
 
 void showDisk(int diskPageNumber){
-
 	//prints out the 4 addresses and data associated with the disk page
-
+	int count = diskPageNumber * 4;
+	int final = count + 4;
+	while(count < final)
+	{
+		printf("%d:%d\n",count,mainMemory[count]);
+		count++;
+	}	
 }
 
-void showPageTable(struct pageEntry pageTable[]){
+void showPageTable(){
 	//print out the 8 pageEntry Objects
 	int count = 0;
 	while(count < 8)
