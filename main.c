@@ -20,17 +20,6 @@ int mainMemory[16]= {0};
 int disk[32] = {0};	
 int main()
 {
-	int count = 0;
-	while(count < 8)
-	{
-		pageTable[count].valid = 0;
-		pageTable[count].dirty = 0;
-		pageTable[count].pageNum = 0;
-		count++;
-	}
-	showPageTable(pageTable);
-	showMain(1);
-	showDisk(4);
 	char input[90];
 	printf("Hello World\n");
 	do
@@ -46,7 +35,7 @@ int main()
 
 void read(int virtualAddress){
 
-	//prints contente of the Memory address
+	//prints content of the Memory address
 
 	// if (){ //if page fault occurss print
 	// 	printf("An Page Fault Has Ocurred\n");
