@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<string.h>
-
+#include <stdlib.h>
 struct pageEntry
 {
 	int valid;
@@ -8,14 +8,15 @@ struct pageEntry
 	int pageNum;
 };
 
-typedef struct { char* str, char c;} str_char_Map;
+typedef struct { char* str; char c;} str_char_Map;
 
-static str_char_Map caseTable[] = {
+str_char_Map caseTable[] = {
 	{"read", 'r'}, {"write", 'w'}, {"showmain", 'm'}, 
 	{"showdisk", 'd'}, {"showptable", 'p'}
 };
 
-int casefromstr(char *key);
+char casefromstr(char *key);
+#define BADKEY 'x'
 
 void read(int virtualAddress);
 void write (int virtualAddress, int num);
@@ -31,6 +32,7 @@ int main()
 	char input[90];
 	char * token;
 	char* argv[20];
+	const char * str = " \n";
 	int argCount = 0;
 	int count = 0;
 
@@ -41,7 +43,7 @@ int main()
 
 		printf("> ");
 		fgets(input, 90, stdin);
-		printf("%s", input);
+		// printf("%s", input);
 		
 
 		token = strtok(input,str);
@@ -54,23 +56,23 @@ int main()
 			
 		}
 		
-		do{			//prints the arguments of the command
-			printf("[%s][%d]\n",argv[count],count);
-			count++;
-		}while (argv[count] != NULL);
+		// do{			//prints the arguments of the command
+		// 	printf("[%s][%d]\n",argv[count],count);
+		// 	count++;
+		// }while (argv[count] != NULL);
 
-		switch (casefromstr(arv[0])){
+		switch (casefromstr(argv[0])){
 		case 'r':
-				read(argv[1]);
+				read(atoi(argv[1]));
 			break;
 		case 'w':
-				write(argv[1],argv[2]);
+				write(atoi(argv[1]),atoi(argv[2]));
 			break;
 		case 'm':		//showmain
-				showMain(argv[1]);
+				showMain(atoi(argv[1]));
 			break;
 		case 'd':		//showdisk
-				showDisk(argv[1]);
+				showDisk(atoi(argv[1]));
 			break;
 		case 'p':		//showptable
 				showPageTable();
@@ -90,7 +92,7 @@ int main()
 void read(int virtualAddress){
 
 	//prints content of the Memory address
-	printf("reading function, read this address %d ",virtualAddress);
+	printf("reading function, read this address %d \n",virtualAddress);
 	// if (){ //if page fault occurss print
 	// 	printf("An Page Fault Has Ocurred\n");
 	// }
@@ -100,7 +102,7 @@ void read(int virtualAddress){
 void write (int virtualAddress, int num){
 
 	//writes data to a memory location
-printf("writing function, write in this address %d, this num %d",virtualAddress,num);
+printf("writing function, write in this address %d, this num %d\n",virtualAddress,num);
 	// if (){ //if page fault occurss print
 	// 	printf("An Page Fault Has Ocurred\n");
 	// }
@@ -138,13 +140,13 @@ void showPageTable(){
 	}
 }
 
-int casefromstr(char *key)
+char casefromstr(char *key)
 {
     int i;
     for (i=0; i < 5; i++) {
-        str_char_Map *map = caseTable[i];
-        if (strcmp(map->str, key) == 0)
-            return map->c;
+        //str_char_Map *map = caseTable[i];
+        if (strcmp(caseTable[i].str, key) == 0)
+            return caseTable[i].c;
     }
     return BADKEY;
 }
