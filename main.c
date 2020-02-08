@@ -8,6 +8,14 @@ struct pageEntry
 	int pageNum;
 };
 
+typedef struct { char* str, char c;} str_char_Map;
+
+static str_char_Map caseTable[] = {
+	{"read", 'r'}, {"write", 'w'}, {"showmain", 'm'}, 
+	{"showdisk", 'd'}, {"showptable", 'p'}
+};
+
+int casefromstr(char *key);
 
 void read(int virtualAddress);
 void write (int virtualAddress, int num);
@@ -21,14 +29,60 @@ int disk[32] = {0};
 int main()
 {
 	char input[90];
+	char * token;
+	char* argv[20];
+	int argCount = 0;
+	int count = 0;
+
 	printf("Hello World\n");
+
 	do
 	{
 
-	printf("> ");
-	fgets(input, 90, stdin);
-	printf("%s", input);
-	
+		printf("> ");
+		fgets(input, 90, stdin);
+		printf("%s", input);
+		
+
+		token = strtok(input,str);
+		argv[0] = token;
+		//printf(token);
+		while ( token != NULL){
+
+			token = strtok(NULL, str);
+			argv[++argCount] = token;
+			
+		}
+		
+		do{			//prints the arguments of the command
+			printf("[%s][%d]\n",argv[count],count);
+			count++;
+		}while (argv[count] != NULL);
+
+		switch (casefromstr(arv[0])){
+		case 'r':
+				read(argv[1]);
+			break;
+		case 'w':
+				write(argv[1],argv[2]);
+			break;
+		case 'm':		//showmain
+				showMain(argv[1]);
+			break;
+		case 'd':		//showdisk
+				showDisk(argv[1]);
+			break;
+		case 'p':		//showptable
+				showPageTable();
+			break;
+
+		}
+
+		//resets to the start of the argv array
+		if (argv[argCount] == NULL){
+			argCount = 0;
+			count = 0;
+		}
 	
 	}while(strcmp(input,"quit\n") != 0);
 }
@@ -36,7 +90,7 @@ int main()
 void read(int virtualAddress){
 
 	//prints content of the Memory address
-
+	printf("reading function, read this address %d ",virtualAddress);
 	// if (){ //if page fault occurss print
 	// 	printf("An Page Fault Has Ocurred\n");
 	// }
@@ -46,7 +100,7 @@ void read(int virtualAddress){
 void write (int virtualAddress, int num){
 
 	//writes data to a memory location
-
+printf("writing function, write in this address %d, this num %d",virtualAddress,num);
 	// if (){ //if page fault occurss print
 	// 	printf("An Page Fault Has Ocurred\n");
 	// }
@@ -82,4 +136,15 @@ void showPageTable(){
 		printf("%d:%d:%d:%d\n",count,pageTable[count].valid,pageTable[count].dirty,pageTable[count].pageNum);
 		count++;
 	}
+}
+
+int casefromstr(char *key)
+{
+    int i;
+    for (i=0; i < 5; i++) {
+        str_char_Map *map = caseTable[i];
+        if (strcmp(map->str, key) == 0)
+            return map->c;
+    }
+    return BADKEY;
 }
