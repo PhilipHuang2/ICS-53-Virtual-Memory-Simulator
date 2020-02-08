@@ -85,8 +85,8 @@ int main()
 			argCount = 0;
 			count = 0;
 		}
-	
-	}while(strcmp(input,"quit\n") != 0);
+		//printf("at the end input is:%s\n", input);
+	}while(strcmp(input,"quit") != 0);
 }
 
 void read(int virtualAddress){
