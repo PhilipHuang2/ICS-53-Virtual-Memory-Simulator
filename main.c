@@ -197,7 +197,6 @@ void copyPageDiskToMem(int source, int destination)
 	}
 	pageTable[source].pageNum = destination;
 	pageTable[source].valid = 1;
-	pageTable[source].dirty = 1;
 }
 int findAvailablePage()
 {
@@ -244,6 +243,7 @@ void read(int virtualAddress){
 				copyPageMemToDisk(availablePage,pageTable[availablePage].pageNum);
 		}
 		copyPageDiskToMem(virtualPage,availablePage);//
+		pageTable[availablePage].dirty = 0;
 		if(0)//LRU enabled
 		{
 			mainMemory[pageTable[availablePage].pageNum * 4].accessed = accessedCount;
@@ -293,6 +293,7 @@ void write (int virtualAddress, int num){
 		accessedCount++;
 		// setting page value
 		mainMemory[availablePage*4 + offset].value = num;
+		pageTable[availablePage].dirty = 1;
 		return;
 	}
 	//increment count when writing to page
