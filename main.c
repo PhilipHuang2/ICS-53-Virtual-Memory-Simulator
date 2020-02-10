@@ -81,28 +81,36 @@ int main()
 				if (argCount == 2){
 					read(atoi(argv[1]));
 				}
+				else
+					printf("Error: Incorrect number of arguments!\n");
 			break;
 		case 'w':
 				if (argCount == 3){
 					write(atoi(argv[1]),atoi(argv[2]));
 				}
+				else 
+					printf("Error: Incorrect number of arguments!\n");
 			break;
 		case 'm':		//showmain
 				if (argCount == 2){
 					showMain(atoi(argv[1]));
 				}
-				
+				else 
+					printf("Error: Incorrect number of arguments!\n");
 			break;
 		case 'd':		//showdisk
 				if (argCount == 2){
 					showDisk(atoi(argv[1]));
 				}
-				
+				else
+					printf("Error: Incorrect number of arguments!\n");
 			break;
 		case 'p':		//showptable
 				if (argCount == 1){
 					showPageTable();
 				}
+				else
+					printf("Error: Incorrect number of arguments!\n");
 			break;
 
 		}
