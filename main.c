@@ -209,7 +209,7 @@ int findAvailablePage()
 void read(int virtualAddress){
 	//prints content of the Memory address
 	int virtualPage = virtualAddress/4;
-	int offset = virtualPage % 4;
+	int offset = virtualAddress % 4;
 	//update accessedCount if in LRU mode
 	if(pageTable[virtualPage].valid != 1)
 	{
@@ -235,7 +235,8 @@ void read(int virtualAddress){
 		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 		accessedCount++;
 	}
-	printf("%d\n", mainMemory[ pageTable[virtualPage].pageNum * 4 + offset].value);
+	printf("virtualPage: %d, pageNum: %d, offset: %d\n", virtualPage,pageTable[virtualPage].pageNum, offset);
+	printf("%d\n", mainMemory[pageTable[virtualPage].pageNum * 4 + offset].value);
 	
 }
 
