@@ -7,6 +7,17 @@ struct pageEntry
 	int dirty;
 	int pageNum;
 };
+// creating a queue to implement FIFO and LRU algorithms
+#define MAX_INT_VALUE  10000000
+struct address
+{
+	int value;
+	int accessed;
+};
+struct address mainMemory[16];
+struct address disk[32];
+int accessedCount = 0;
+
 
 typedef struct { char* str; char c;} str_char_Map;
 
@@ -18,6 +29,9 @@ str_char_Map caseTable[] = {
 char casefromstr(char *key);
 #define BADKEY 'x'
 
+int findVictimPage();
+void initializeValues();
+int findPageinPageTable();
 void read(int virtualAddress);
 void write (int virtualAddress, int num);
 void showMain (int physicalPageNumber);
@@ -28,8 +42,6 @@ void copyPageMemToDisk(int source, int destination);
 void copyPageDiskToMem(int source, int destination);
 
 struct pageEntry pageTable[8];
-int mainMemory[16]= {-1}; // need to initialize all values to negative 1
-int disk[32] = {-1};	// same here
 int main()
 {
 	char input[90];
@@ -40,10 +52,10 @@ int main()
 	int count = 0;
 
 	printf("Hello World\n");
+	initializeValues();
 
 	do
 	{
-
 		printf("> ");
 		fgets(input, 90, stdin);
 		// printf("%s", input);
@@ -92,16 +104,63 @@ int main()
 	}while(strcmp(input,"quit") != 0);
 }
 
+int findVictimPage()
+{
+	int smallestValue = MAX_INT_VALUE;
+	int page = 0;
+	int count = 0;
+	while(count < 16)
+	{
+		if(smallestValue > mainMemory[count].accessed)
+		{
+			page = count;
+			smallestValue = mainMemory[count].accessed;
+		}
+		count = count + 4;
+	}
+	if(smallestValue == MAX_INT_VALUE)
+		return -1;
+	return page/4;
+}
+
+void initializeValues()
+{
+	//initialize values for pageTable, mainMemory, disk
+	int countPageTable = 0;
+	while( countPageTable <= 7)
+	{
+		pageTable[countPageTable].pageNum = countPageTable;
+		countPageTable++;
+	}
+	countPageTable = 0;
+	while (countPageTable <= 15)
+	{
+		mainMemory[countPageTable].value = -1;
+		mainMemory[countPageTable].accessed = MAX_INT_VALUE;
+		countPageTable++;
+	}
+	countPageTable = 0;
+	while(countPageTable <= 31)
+	{
+		disk[countPageTable].value = -1;
+		disk[countPageTable].accessed = MAX_INT_VALUE;
+		countPageTable++;
+	}
+	
+}
 void copyPageMemToDisk(int source, int destination)
 {
 	int increment = 0;
 	int firstDiskAddress = destination * 4;
 	int firstMainMemAddress = source *4;
+
 	while( increment < 4)
 	{
-		disk[firstDiskAddress + increment] 
-			= mainMemory[firstMainMemAddress + increment];
+		disk[firstDiskAddress + increment].value 
+			= mainMemory[firstMainMemAddress + increment].value;
+			increment++;
 	}
+	pageTable[destination].dirty = 0;
 }
 void copyPageDiskToMem(int source, int destination)
 {
@@ -110,11 +169,25 @@ void copyPageDiskToMem(int source, int destination)
 	int firstMainMemAddress = destination *4;
 	while( increment < 4)
 	{
-		mainMemory[firstMainMemAddress + increment] =
-			disk[firstDiskAddress + increment];
+		disk[firstDiskAddress + increment].value 
+			= mainMemory[firstMainMemAddress + increment].value;
+			increment++;
 	}
+	pageTable[source].pageNum = destination;
+	pageTable[source].valid = 1;
 }
 
+int findVictimPageTable(int physicalPage)
+{
+	int count =0;
+	while( count < 8)
+	{
+		if(pageTable[count].pageNum == physicalPage)
+			return count;
+		count++;
+	}
+	return -1;
+}
 
 int findAvailablePage()
 {
@@ -134,65 +207,101 @@ int findAvailablePage()
 	while(count <= 3)
 	{
 		if(mark[count] == 0)
-			return count;
+			return findVictimPageTable(count);
 		count++;
 	}
+	//Call either FIFO or LRU replacement algorithm
 	return -1;
 
 }
 
+
+
 void read(int virtualAddress){
 	//prints content of the Memory address
 	int virtualPage = virtualAddress/4;
-	printf("reading function, read this address %d\n",virtualPage);
+	int offset = virtualPage % 4;
+	//update accessedCount if in LRU mode
 	if(pageTable[virtualPage].valid != 1)
 	{
 		printf("An Page Fault Has Ocurred\n");
-		showPageTable();
-		// printf("Virtual Page %d is not in main memory\n", virtualPage);
-		// printf("Physical Page %d in Main Memory is open.\n", findAvailablePage());
 		int availablePage = findAvailablePage();
 		if(availablePage == -1)
 		{
-			//FindVictimPage
-			//CopyPage if dirty
-			//CopyPage
+			availablePage = findVictimPage();
+			if(pageTable[availablePage].dirty == 1)
+				copyPageMemToDisk(availablePage,pageTable[availablePage].pageNum);
 		}
-		copyPageDiskToMem(virtualPage,availablePage);
+		copyPageDiskToMem(virtualPage,availablePage);//
+		if(0)//LRU enabled
+		{
+			mainMemory[pageTable[availablePage].pageNum * 4].accessed = accessedCount;
+			accessedCount++;
+		}
+		printf("%d\n",mainMemory[pageTable[availablePage].pageNum * 4 + offset].value);
 		return;
 	}
-		
-	// pageTable[virtualPage].pageNum = page in Memory
-	// virtualAddress % 4 =  offset from the 0th address in page;
-	printf("This is the physical Address: %d\n", pageTable[virtualPage].pageNum + virtualAddress % 4);
+	if(0)//LRU enabled TODO
+	{
+		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
+		accessedCount++;
+	}
+	printf("%d\n", mainMemory[ pageTable[virtualPage].pageNum * 4 + offset].value);
 	
-	// if (){ //if page fault occurss print
-	// 	printf("An Page Fault Has Ocurred\n");
-	// }
-
 }
 
 void write (int virtualAddress, int num){
+	int virtualPage = virtualAddress/4;
+	int offset = virtualAddress % 4;
+	// checking if virtual page is in main memory
+	if(pageTable[virtualPage].valid != 1)
+	{
+		printf("An Page Fault Has Ocurred\n");
+		// finding an empty main memory page
+		int availablePage = findAvailablePage();
+		printf("findAvaiablePage: %d\n", availablePage);
+		if(availablePage == -1)
+		{
+			// finding the least used page to kill
+			availablePage =  findVictimPage();
+			printf("findVictimPage: %d\n", availablePage);
+			pageTable[availablePage].valid = 0;
+			
+			printf("findVictimPage\n");
+			// if page is dirty, copy it to disk
+			if(pageTable[availablePage].dirty == 1)
+				copyPageMemToDisk(availablePage,pageTable[availablePage].pageNum);
 
-	//writes data to a memory location
-printf("writing function, write in this address %d, this num %d\n",virtualAddress,num);
-	// if (){ //if page fault occurss print
-	// 	printf("An Page Fault Has Ocurred\n");
-	// }
+			
+		}
+		// copy page from disk to main memory
+		copyPageDiskToMem(virtualPage,availablePage);
+		printf("copyPageDiskToMem\n");
+		// increment count for that particular page
+		mainMemory[pageTable[availablePage].pageNum * 4].accessed = accessedCount;
+		accessedCount++;
+		// setting page value
+		mainMemory[availablePage*4 + offset].value = num;
+		// dirtying page
+		pageTable[availablePage].dirty = 1;
+		return;
+	}
+	//increment count when writing to page
+	mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
+	accessedCount++;
+	// changing page in main memory
+	mainMemory[pageTable[virtualPage].pageNum + offset].value = num;
+	// dirtying page
+	pageTable[virtualPage].dirty = 1;
 }
 
 void showMain (int physicalPageNumber){
 	//prints out the 4 address and data associated with the main memory page
-	if(physicalPageNumber < 0 || physicalPageNumber > 3)
-	{
-		printf("Page %d does not exist in Main Memory, Trying searching pages 0-3.\n", physicalPageNumber);
-		return;
-	}
 	int count = physicalPageNumber * 4;
 	int final = count + 4;
 	while(count < final)
 	{
-		printf("%d:%d\n",count,mainMemory[count]);
+		printf("%d:%d\n",count,mainMemory[count].value);
 		count++;
 	}	
 }
@@ -208,7 +317,7 @@ void showDisk(int diskPageNumber){
 	int final = count + 4;
 	while(count < final)
 	{
-		printf("%d:%d\n",count,mainMemory[count]);
+		printf("%d:%d\n",count,mainMemory[count].value);
 		count++;
 	}	
 }
