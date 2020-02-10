@@ -255,11 +255,12 @@ void write (int virtualAddress, int num){
 			availablePage =  findVictimPage();
 			printf("findVictimPage: %d\n", availablePage);
 			pageTable[availablePage].valid = 0;
-			
-			printf("findVictimPage\n");
 			// if page is dirty, copy it to disk
 			if(pageTable[availablePage].dirty == 1)
+			{
+				pageTable[availablePage].dirty = 0;
 				copyPageMemToDisk(availablePage,pageTable[availablePage].pageNum);
+			}
 
 			
 		}
