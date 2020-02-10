@@ -175,25 +175,13 @@ void copyPageDiskToMem(int source, int destination)
 	}
 	pageTable[source].pageNum = destination;
 	pageTable[source].valid = 1;
+	pageTable[source].dirty = 1;
 }
-
-int findVictimPageTable(int physicalPage)
-{
-	int count =0;
-	while( count < 8)
-	{
-		if(pageTable[count].pageNum == physicalPage)
-			return count;
-		count++;
-	}
-	return -1;
-}
-
 int findAvailablePage()
 {
 	//returns the first avaiable page in main memory that is free [0-3]
 	// otherwises return -1 if no space is available.
-	int mark[4]; // all should be initialized to 0;
+	int mark[4] = {0,0,0,0}; // all should be initialized to 0;
 	int count = 0;
 	while(count <= 7)
 	{
@@ -206,11 +194,12 @@ int findAvailablePage()
 	count = 0;
 	while(count <= 3)
 	{
-		if(mark[count] == 0)
-			return findVictimPageTable(count);
+		if(mark[count] == 0)	
+			return count; // returns the physical Page that is empty
 		count++;
 	}
 	//Call either FIFO or LRU replacement algorithm
+	printf("calling nulll on findAvailablePage\n");
 	return -1;
 
 }
@@ -225,7 +214,7 @@ void read(int virtualAddress){
 	if(pageTable[virtualPage].valid != 1)
 	{
 		printf("An Page Fault Has Ocurred\n");
-		int availablePage = findAvailablePage();
+		int availablePage = findAvailablePage(); //return 0-7 or -1
 		if(availablePage == -1)
 		{
 			availablePage = findVictimPage();
@@ -278,12 +267,10 @@ void write (int virtualAddress, int num){
 		copyPageDiskToMem(virtualPage,availablePage);
 		printf("copyPageDiskToMem\n");
 		// increment count for that particular page
-		mainMemory[pageTable[availablePage].pageNum * 4].accessed = accessedCount;
+		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 		accessedCount++;
 		// setting page value
 		mainMemory[availablePage*4 + offset].value = num;
-		// dirtying page
-		pageTable[availablePage].dirty = 1;
 		return;
 	}
 	//increment count when writing to page
