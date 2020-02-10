@@ -78,19 +78,31 @@ int main()
 
 		switch (casefromstr(argv[0])){
 		case 'r':
-				read(atoi(argv[1]));
+				if (argCount == 2){
+					read(atoi(argv[1]));
+				}
 			break;
 		case 'w':
-				write(atoi(argv[1]),atoi(argv[2]));
+				if (argCount == 3){
+					write(atoi(argv[1]),atoi(argv[2]));
+				}
 			break;
 		case 'm':		//showmain
-				showMain(atoi(argv[1]));
+				if (argCount == 2){
+					showMain(atoi(argv[1]));
+				}
+				
 			break;
 		case 'd':		//showdisk
-				showDisk(atoi(argv[1]));
+				if (argCount == 2){
+					showDisk(atoi(argv[1]));
+				}
+				
 			break;
 		case 'p':		//showptable
-				showPageTable();
+				if (argCount == 1){
+					showPageTable();
+				}
 			break;
 
 		}
