@@ -156,10 +156,13 @@ void copyPageMemToDisk(int source, int destination)
 
 	while( increment < 4)
 	{
+		printf("firstDiskAddress: %d, value: %d\n",firstDiskAddress + increment ,  mainMemory[firstMainMemAddress + increment].value);
+
 		disk[firstDiskAddress + increment].value 
 			= mainMemory[firstMainMemAddress + increment].value;
 			increment++;
 	}
+	pageTable[destination].valid = 0;
 	pageTable[destination].dirty = 0;
 }
 void copyPageDiskToMem(int source, int destination)
@@ -169,9 +172,8 @@ void copyPageDiskToMem(int source, int destination)
 	int firstMainMemAddress = destination *4;
 	while( increment < 4)
 	{
-		disk[firstDiskAddress + increment].value 
-			= mainMemory[firstMainMemAddress + increment].value;
-			increment++;
+		mainMemory[firstMainMemAddress + increment].value = disk[firstDiskAddress + increment].value;
+		increment++;
 	}
 	pageTable[source].pageNum = destination;
 	pageTable[source].valid = 1;
@@ -235,7 +237,6 @@ void read(int virtualAddress){
 		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 		accessedCount++;
 	}
-	printf("virtualPage: %d, pageNum: %d, offset: %d\n", virtualPage,pageTable[virtualPage].pageNum, offset);
 	printf("%d\n", mainMemory[pageTable[virtualPage].pageNum * 4 + offset].value);
 	
 }
@@ -259,7 +260,6 @@ void write (int virtualAddress, int num){
 			// if page is dirty, copy it to disk
 			if(pageTable[availablePage].dirty == 1)
 			{
-				pageTable[availablePage].dirty = 0;
 				copyPageMemToDisk(availablePage,pageTable[availablePage].pageNum);
 			}
 
@@ -306,7 +306,7 @@ void showDisk(int diskPageNumber){
 	int final = count + 4;
 	while(count < final)
 	{
-		printf("%d:%d\n",count,mainMemory[count].value);
+		printf("%d:%d\n",count, disk[count].value);
 		count++;
 	}	
 }
