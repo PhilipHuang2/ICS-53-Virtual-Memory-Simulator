@@ -1,3 +1,5 @@
+//Name: Philip Huang ID: 17535384
+//Name: Carlos Yan Ho ID:56051179
 #include<stdio.h>
 #include<string.h>
 #include <stdlib.h>
@@ -41,15 +43,6 @@ int findAvailablePage();
 void copyPageMemToDisk(int source, int destination);
 void copyPageDiskToMem(int source, int destination);
 
-void showAccess()
-{
-	int count = 0;
-	while(count <= 3)
-	{
-		printf("[%d]: %d\n",count, mainMemory[count * 4].accessed);
-		count++;
-	}
-}
 
 struct pageEntry pageTable[8];
 int main(int argc, char * argV[])
@@ -67,15 +60,10 @@ int main(int argc, char * argV[])
 
 	do
 	{
-		//showAccess();
 		printf("> ");
 		fgets(input, 90, stdin);
-		// printf("%s", input);
-		
-
 		token = strtok(input,str);
 		argv[0] = token;
-		//printf(token);
 		while ( token != NULL){
 
 			token = strtok(NULL, str);
@@ -83,11 +71,6 @@ int main(int argc, char * argV[])
 			
 		}
 		
-		// do{			//prints the arguments of the command
-		// 	printf("[%s][%d]\n",argv[count],count);
-		// 	count++;
-		// }while (argv[count] != NULL);
-
 		switch (casefromstr(argv[0])){
 		case 'r':
 				if (argCount == 2){
@@ -132,7 +115,6 @@ int main(int argc, char * argV[])
 			argCount = 0;
 			count = 0;
 		}
-		//printf("at the end input is:%s\n", input);
 	}while(strcmp(input,"quit") != 0);
 }
 
@@ -189,8 +171,7 @@ void copyPageMemToDisk(int source, int destination)
 
 	while( increment < 4)
 	{
-		printf("firstDiskAddress: %d, value: %d\n",firstDiskAddress + increment ,  mainMemory[firstMainMemAddress + increment].value);
-
+		// printf("firstDiskAddress: %d, value: %d\n",firstDiskAddress + increment ,  mainMemory[firstMainMemAddress + increment].value);
 		disk[firstDiskAddress + increment].value 
 			= mainMemory[firstMainMemAddress + increment].value;
 			increment++;
@@ -233,10 +214,7 @@ int findAvailablePage()
 			return count; // returns the physical Page that is empty
 		count++;
 	}
-	//Call either FIFO or LRU replacement algorithm
-	printf("calling nulll on findAvailablePage\n");
 	return -1;
-
 }
 
 
@@ -253,11 +231,8 @@ void read(int virtualAddress){
 		if(availablePage == -1)
 		{
 			availablePage = findVictimPage();
-			printf("Victim Page is %d\n", availablePage);
 			if(pageTable[availablePage].dirty == 1)
 			{
-
-				printf("copying\n");
 				int count = 0;
 				while(pageTable[count].pageNum != availablePage)
 				{count ++;}
@@ -290,23 +265,21 @@ void write (int virtualAddress, int num){
 		printf("An Page Fault Has Ocurred\n");
 		// finding an empty main memory page
 		int availablePage = findAvailablePage();
-		printf("findAvaiablePage: %d\n", availablePage);
 		if(availablePage == -1)
 		{
 			// finding the least used page to kill
 			availablePage =  findVictimPage();
-			printf("findVictimPage: %d\n", availablePage);
 			// if page is dirty, copy it to disk
 			if(pageTable[availablePage].dirty == 1)
 			{
-				copyPageMemToDisk(availablePage,pageTable[availablePage].pageNum);
-			}
-
-			
+				int count = 0;
+				while(pageTable[count].pageNum != availablePage)
+				{count ++;}
+				copyPageMemToDisk(availablePage,count);
+			}			
 		}
 		// copy page from disk to main memory
 		copyPageDiskToMem(virtualPage,availablePage);
-		printf("copyPageDiskToMem\n");
 		// increment count for that particular page
 		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 		accessedCount++;
@@ -337,11 +310,6 @@ void showMain (int physicalPageNumber){
 
 void showDisk(int diskPageNumber){
 	//prints out the 4 addresses and data associated with the disk page
-	if(diskPageNumber < 0 || diskPageNumber > 7)
-	{
-		printf("Page %d does not exist in Main Memory, Trying searching pages 0-7.\n", diskPageNumber);
-		return;
-	}
 	int count = diskPageNumber * 4;
 	int final = count + 4;
 	while(count < final)
