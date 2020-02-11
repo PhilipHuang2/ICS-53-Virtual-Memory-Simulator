@@ -17,7 +17,7 @@ struct address
 struct address mainMemory[16];
 struct address disk[32];
 int accessedCount = 0;
-
+char * replacementAlgorith;
 
 typedef struct { char* str; char c;} str_char_Map;
 
@@ -42,7 +42,7 @@ void copyPageMemToDisk(int source, int destination);
 void copyPageDiskToMem(int source, int destination);
 
 struct pageEntry pageTable[8];
-int main()
+int main(int argc, char * argV[])
 {
 	char input[90];
 	char * token;
@@ -50,8 +50,9 @@ int main()
 	const char * str = " \n";
 	int argCount = 0;
 	int count = 0;
-
+	replacementAlgorith = argV[1];
 	printf("Hello World\n");
+	printf("%s\n", replacementAlgorith);
 	initializeValues();
 
 	do
@@ -250,7 +251,7 @@ void read(int virtualAddress){
 		printf("%d\n",mainMemory[pageTable[virtualPage].pageNum * 4 + offset].value);
 		return;
 	}
-	if(0)//LRU enabled TODO
+	if(strcmp(replacementAlgorith,"LRU") == 1)//LRU enabled TODO
 	{
 		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 		accessedCount++;
@@ -290,7 +291,7 @@ void write (int virtualAddress, int num){
 		accessedCount++;
 		// setting page value
 		mainMemory[availablePage*4 + offset].value = num;
-		pageTable[availablePage].dirty = 1;
+		pageTable[virtualPage].dirty = 1;
 		return;
 	}
 	//increment count when writing to page
