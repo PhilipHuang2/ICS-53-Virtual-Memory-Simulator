@@ -41,6 +41,16 @@ int findAvailablePage();
 void copyPageMemToDisk(int source, int destination);
 void copyPageDiskToMem(int source, int destination);
 
+void showAccess()
+{
+	int count = 0;
+	while(count <= 3)
+	{
+		printf("[%d]: %d\n",count, mainMemory[count * 4].accessed);
+		count++;
+	}
+}
+
 struct pageEntry pageTable[8];
 int main(int argc, char * argV[])
 {
@@ -57,6 +67,7 @@ int main(int argc, char * argV[])
 
 	do
 	{
+		//showAccess();
 		printf("> ");
 		fgets(input, 90, stdin);
 		// printf("%s", input);
@@ -186,6 +197,7 @@ void copyPageMemToDisk(int source, int destination)
 	}
 	pageTable[destination].valid = 0;
 	pageTable[destination].dirty = 0;
+	pageTable[destination].pageNum = destination;
 }
 void copyPageDiskToMem(int source, int destination)
 {
@@ -241,17 +253,26 @@ void read(int virtualAddress){
 		if(availablePage == -1)
 		{
 			availablePage = findVictimPage();
+			printf("Victim Page is %d\n", availablePage);
 			if(pageTable[availablePage].dirty == 1)
-				copyPageMemToDisk(availablePage,pageTable[availablePage].pageNum);
+			{
+
+				printf("copying\n");
+				int count = 0;
+				while(pageTable[count].pageNum != availablePage)
+				{count ++;}
+				copyPageMemToDisk(availablePage, count);
+			}
+				
 		}
-		copyPageDiskToMem(virtualPage,availablePage);//
+		copyPageDiskToMem(virtualPage,availablePage);
 		pageTable[virtualPage].dirty = 0;
 		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 		accessedCount++;
 		printf("%d\n",mainMemory[pageTable[virtualPage].pageNum * 4 + offset].value);
 		return;
 	}
-	if(strcmp(replacementAlgorith,"LRU") == 1)//LRU enabled TODO
+	if(strcmp(replacementAlgorith,"LRU") == 0)//LRU enabled TODO
 	{
 		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 		accessedCount++;
