@@ -53,10 +53,16 @@ int main(int argc, char * argV[])
 	const char * str = " \n";
 	int argCount = 0;
 	int count = 0;
-	replacementAlgorith = argV[1];
-	printf("Hello World\n");
-	printf("%s\n", replacementAlgorith);
+	
+	
+	
 	initializeValues();
+	if (argc == 2){
+		replacementAlgorith = argV[1];
+		//printf("%s\n", replacementAlgorith);
+	} 
+	else
+		replacementAlgorith = "FIFO";
 
 	do
 	{
@@ -226,8 +232,9 @@ void read(int virtualAddress){
 	//update accessedCount if in LRU mode
 	if(pageTable[virtualPage].valid != 1)
 	{
-		printf("An Page Fault Has Ocurred\n");
+		printf("A Page Fault Has Ocurred\n");
 		int availablePage = findAvailablePage(); //0-3
+		//printf ("availablePage: %d\n", availablePage);
 		if(availablePage == -1)
 		{
 			availablePage = findVictimPage();
@@ -244,9 +251,11 @@ void read(int virtualAddress){
 		pageTable[virtualPage].dirty = 0;
 		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 		accessedCount++;
+		//printf("virtual page:%d , pageNum:%d , offset:%d\n",virtualPage, pageTable[virtualPage].pageNum,  offset);
 		printf("%d\n",mainMemory[pageTable[virtualPage].pageNum * 4 + offset].value);
 		return;
 	}
+
 	if(strcmp(replacementAlgorith,"LRU") == 0)//LRU enabled TODO
 	{
 		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
@@ -262,7 +271,7 @@ void write (int virtualAddress, int num){
 	// checking if virtual page is in main memory
 	if(pageTable[virtualPage].valid != 1)
 	{
-		printf("An Page Fault Has Ocurred\n");
+		printf("A Page Fault Has Ocurred\n");
 		// finding an empty main memory page
 		int availablePage = findAvailablePage();
 		if(availablePage == -1)
