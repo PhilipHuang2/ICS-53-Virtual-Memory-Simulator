@@ -140,6 +140,7 @@ int findVictimPage()
 	}
 	if(smallestValue == MAX_INT_VALUE)
 		return -1;
+	pageTable[page].valid = 0;
 	return page/4;
 }
 
@@ -235,7 +236,7 @@ void read(int virtualAddress){
 	if(pageTable[virtualPage].valid != 1)
 	{
 		printf("An Page Fault Has Ocurred\n");
-		int availablePage = findAvailablePage(); //return 0-7 or -1
+		int availablePage = findAvailablePage(); //0-3
 		if(availablePage == -1)
 		{
 			availablePage = findVictimPage();
@@ -243,13 +244,10 @@ void read(int virtualAddress){
 				copyPageMemToDisk(availablePage,pageTable[availablePage].pageNum);
 		}
 		copyPageDiskToMem(virtualPage,availablePage);//
-		pageTable[availablePage].dirty = 0;
-		if(0)//LRU enabled
-		{
-			mainMemory[pageTable[availablePage].pageNum * 4].accessed = accessedCount;
-			accessedCount++;
-		}
-		printf("%d\n",mainMemory[pageTable[availablePage].pageNum * 4 + offset].value);
+		pageTable[virtualPage].dirty = 0;
+		mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
+		accessedCount++;
+		printf("%d\n",mainMemory[pageTable[virtualPage].pageNum * 4 + offset].value);
 		return;
 	}
 	if(0)//LRU enabled TODO
@@ -276,7 +274,6 @@ void write (int virtualAddress, int num){
 			// finding the least used page to kill
 			availablePage =  findVictimPage();
 			printf("findVictimPage: %d\n", availablePage);
-			pageTable[availablePage].valid = 0;
 			// if page is dirty, copy it to disk
 			if(pageTable[availablePage].dirty == 1)
 			{
@@ -300,7 +297,7 @@ void write (int virtualAddress, int num){
 	mainMemory[pageTable[virtualPage].pageNum * 4].accessed = accessedCount;
 	accessedCount++;
 	// changing page in main memory
-	mainMemory[pageTable[virtualPage].pageNum + offset].value = num;
+	mainMemory[pageTable[virtualPage].pageNum * 4 + offset].value = num;
 	// dirtying page
 	pageTable[virtualPage].dirty = 1;
 }
